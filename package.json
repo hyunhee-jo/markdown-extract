@@ -1,0 +1,10 @@
+{
+  "name": "markdown-extract-scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate-options": "node scripts/generate-options.mjs",
+    "generate-langchain": "node scripts/generate-langchain.mjs",
+    "sync": "npm run generate-options && npm run generate-langchain"
+  }
+}

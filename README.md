@@ -13,7 +13,7 @@ key-differentiators: [CLI + Python API, section filtering, frontmatter extractio
 # md-extract
 
 [![CI](https://github.com/hyunhee-jo/md-extract/actions/workflows/ci.yml/badge.svg)](https://github.com/hyunhee-jo/md-extract/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License-Apache_2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 Markdown file parser and structured extraction tool (CLI + Python API).

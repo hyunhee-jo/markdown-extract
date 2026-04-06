@@ -9,7 +9,7 @@ description = "Markdown file parser and structured extraction tool"
 authors = [{ name = "hyunhee-jo" }]
 requires-python = ">=3.10"
 readme = "README.md"
-license = "MIT"
+license = "Apache-2.0"
 keywords = ["markdown", "parser", "extraction", "cli", "structured-data"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Topic :: Text Processing :: Markup :: Markdown",
 ]
 

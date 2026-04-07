@@ -131,7 +131,7 @@ async function main() {
   // 8. Generate PR body
   let prBody = null;
   if (prBodyPath || dryRun) {
-    prBody = generatePrBody(version, added, removed, breaking);
+    prBody = generatePrBody(version, added, removed, breaking, allOptions);
   }
 
   // 9. Output
@@ -237,7 +237,7 @@ function generateReadmeTableRows(options) {
   return lines.join('\n');
 }
 
-function generatePrBody(version, added, removed, breaking) {
+function generatePrBody(version, added, removed, breaking, allOptions) {
   const lines = [
     `## Sync upstream v${version}`,
     '',
@@ -245,6 +245,7 @@ function generatePrBody(version, added, removed, breaking) {
     '',
   ];
 
+  // --- Change summary ---
   if (breaking) {
     lines.push('### ⚠️ Breaking Changes');
     lines.push('');
@@ -259,7 +260,9 @@ function generatePrBody(version, added, removed, breaking) {
     lines.push('### ✨ New Parameters');
     lines.push('');
     for (const p of added) {
-      lines.push(`- \`${p}\``);
+      const opt = allOptions.find(o => toSnakeCase(o.name) === p);
+      const desc = opt ? ` — ${opt.description}` : '';
+      lines.push(`- \`${p}\`${desc}`);
     }
     lines.push('');
   }
@@ -269,11 +272,71 @@ function generatePrBody(version, added, removed, breaking) {
     lines.push('');
   }
 
-  lines.push('### Updated Files');
+  // --- Auto-generated files ---
+  lines.push('### Auto-updated Files');
   lines.push('');
-  lines.push('- `document_loaders.py` — SYNCED PARAMS, ASSIGNMENTS, CONVERT KWARGS');
-  lines.push('- `README.md` — Parameters Reference table');
-  lines.push('- `pyproject.toml` — dependency version');
+  lines.push('- [x] `document_loaders.py` — SYNCED PARAMS, ASSIGNMENTS, CONVERT KWARGS');
+  lines.push('- [x] `README.md` — Parameters Reference table');
+  lines.push('- [x] `pyproject.toml` — dependency version bumped');
+  lines.push('');
+
+  // --- Review checklist (dynamic) ---
+  lines.push('### Review Checklist');
+  lines.push('');
+
+  // Always required
+  lines.push('**Auto-generated code verification:**');
+  lines.push('- [ ] SYNCED PARAMS: types and defaults are correct');
+  lines.push('- [ ] SYNCED ASSIGNMENTS: all new params assigned');
+  lines.push('- [ ] SYNCED CONVERT KWARGS: all new params passed to extract()');
+  lines.push('- [ ] README table: new rows accurate, existing rows unchanged');
+  lines.push('');
+
+  // Conditional: new params
+  if (added.length) {
+    lines.push('**New parameters (manual work needed):**');
+    for (const p of added) {
+      lines.push(`- [ ] Add test for \`${p}\` (at minimum: mock kwargs pass-through)`);
+    }
+    lines.push(`- [ ] Docstring Args section updated for: ${added.map(p => `\`${p}\``).join(', ')}`);
+    lines.push('');
+  }
+
+  // Conditional: breaking
+  if (breaking) {
+    lines.push('**Breaking changes (manual work needed):**');
+    for (const p of removed) {
+      lines.push(`- [ ] Remove tests referencing \`${p}\``);
+    }
+    lines.push('- [ ] CHANGELOG: document breaking change');
+    lines.push('- [ ] Bump MAJOR version');
+    lines.push('');
+  }
+
+  // Conditional: check wrapper logic impact
+  if (added.length || removed.length) {
+    lines.push('**Wrapper logic impact check:**');
+    lines.push('- [ ] `split_sections` logic: does any new param affect section splitting?');
+    lines.push('- [ ] Error handling in `lazy_load`: any new failure modes?');
+    lines.push('- [ ] Metadata fields: should new param appear in Document metadata?');
+    lines.push('');
+  }
+
+  // Always required
+  lines.push('**Before merge:**');
+  lines.push('- [ ] All tests pass: `pytest tests/ -v --disable-socket`');
+  lines.push('- [ ] CHANGELOG updated');
+  if (added.length && !breaking) {
+    lines.push('- [ ] Bump MINOR version');
+  }
+  if (!added.length && !removed.length) {
+    lines.push('- [ ] Bump PATCH version');
+  }
+  lines.push('');
+
+  lines.push('**After merge:**');
+  lines.push('- [ ] Tag push: `git tag vX.Y.Z && git push --tags`');
+  lines.push('- [ ] PyPI deployment verified');
 
   return lines.join('\n');
 }

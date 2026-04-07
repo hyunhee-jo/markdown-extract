@@ -57,8 +57,12 @@ export function replaceMarkerBlock(content, beginMarker, endMarker, replacement)
     throw new Error(`Markers not found: ${beginMarker} / ${endMarker}`);
   }
 
+  // Preserve the indentation of the end marker line
+  const lineStart = content.lastIndexOf('\n', endIdx) + 1;
+  const indent = content.substring(lineStart, endIdx).match(/^(\s*)/)?.[1] || '';
+
   const before = content.substring(0, beginIdx + beginMarker.length);
-  const after = content.substring(endIdx);
+  const after = `${indent}${endMarker}${content.substring(endIdx + endMarker.length)}`;
 
   return `${before}\n${replacement}\n${after}`;
 }

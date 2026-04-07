@@ -27,6 +27,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // --- Config (hardcoded, no separate config file) ---
 const EXCLUDE_OPTIONS = ['output-dir'];
+const EXCLUDE_FROM_KWARGS = ['quiet'];  // Passed separately to extract()
 const DEFAULT_OVERRIDES = {
   'format': '"text"',  // Wrapper default: text (upstream: json) for RAG use case
 };
@@ -216,6 +217,7 @@ function generateSyncedAssignments(options) {
 function generateSyncedConvertKwargs(options) {
   const lines = ['            convert_kwargs: dict[str, Any] = {'];
   for (const opt of options) {
+    if (EXCLUDE_FROM_KWARGS.includes(opt.name)) continue;
     const snake = toSnakeCase(opt.name);
     lines.push(`                "${snake}": self.${snake},`);
   }
@@ -228,7 +230,10 @@ function generateReadmeTableRows(options) {
   for (const opt of options) {
     const snake = toSnakeCase(opt.name);
     const pyType = opt.type === 'boolean' ? '`bool`' : '`str`';
-    const pyDefault = opt.default === null ? '`None`'
+    // Apply DEFAULT_OVERRIDES for README too
+    const overriddenDefault = DEFAULT_OVERRIDES[opt.name];
+    const pyDefault = overriddenDefault ? `\`${overriddenDefault}\``
+      : opt.default === null ? '`None`'
       : opt.type === 'boolean' ? (opt.default ? '`True`' : '`False`')
       : `\`"${opt.default}"\``;
     const desc = escapeMarkdown(opt.description);
